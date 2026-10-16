@@ -1,0 +1,18 @@
+---
+- name: Ensure application system group exists
+  ansible.builtin.group:
+    name: "{{ podman_pod_group }}"
+    state: present
+
+- name: Ensure application system user exists
+  ansible.builtin.user:
+    name: "{{ podman_pod_user }}"
+    group: "{{ podman_pod_group }}"
+    shell: "{{ podman_pod_shell }}"
+    create_home: true
+    state: present
+
+- name: Get UID of application user
+  ansible.builtin.command: "id -u {{ podman_pod_user }}"
+  register: podman_user_uid
+  changed_when: false

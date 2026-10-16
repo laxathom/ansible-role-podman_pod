@@ -1,0 +1,12 @@
+---
+podman_pod_user: podman
+podman_pod_group: podman
+podman_pod_shell: /bin/bash
+
+podman_pod_network: reverse-network
+podman_pod_name: podman_pod
+
+podman_pod_allow_unprivileged_ports: false
+podman_pod_published_ports:
+  - "8080:80"
+  - "8443:443"

@@ -1,0 +1,22 @@
+[Unit]
+Description=Pod {{ podman_pod_name }}
+{% if podman_pod_network is defined %}
+After={{ podman_pod_network }}-network.service
+Requires={{ podman_pod_network }}-network.service
+{% endif %}
+
+
+[Pod]
+PodName={{ podman_pod_name }}
+{% if podman_pod_network is defined %}
+Network={{ podman_pod_network }}
+{% endif %}
+
+{% if podman_pod_published_ports is defined %}
+{% for port in podman_pod_published_ports %}
+PublishPort={{ port }}
+{% endfor %}
+{% endif %}
+
+[Install]
+WantedBy=default.target

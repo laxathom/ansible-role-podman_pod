@@ -1,0 +1,47 @@
+---
+- name: Get Podman major version
+  ansible.builtin.command:
+    cmd: podman --version
+  register: podman_version_raw
+  changed_when: false
+
+- name: Set Quadlet file extension based on Podman version
+  ansible.builtin.set_fact:
+    quadlet_ext: "{{ (podman_version_raw.stdout | regex_search('podman version ([0-9]+)', '\\1') | first | int >= 5) | ternary('pod', 'container') }}"
+
+- name: Ensure enable-linger is active
+  ansible.builtin.command:
+    cmd: "loginctl enable-linger {{ podman_pod_user }}"
+  args:
+    creates: "/var/lib/systemd/linger/{{ podman_pod_user }}"
+
+- name: Ensure Quadlet directory exists
+  ansible.builtin.file:
+    path: "/home/{{ podman_pod_user }}/.config/containers/systemd"
+    state: directory
+    owner: "{{ podman_pod_user }}"
+    group: "{{ podman_pod_user }}"
+    mode: '0750'
+
+- name: Include Quadlet network setup
+  ansible.builtin.include_tasks: deploy-quadlet-network.yml
+  when: podman_pod_network is defined
+
+- name: Deploy Quadlet .pod unit
+  ansible.builtin.template:
+    src: pod.pod.j2
+    dest: "/home/{{ podman_pod_user }}/.config/containers/systemd/{{ podman_pod_name }}.{{ quadlet_ext }}"
+    owner: "{{ podman_pod_user }}"
+    group: "{{ podman_pod_user }}"
+    mode: '0644'
+
+- name: Reload systemd user daemon
+  ansible.builtin.systemd_service:
+    daemon_reload: true
+    scope: user
+  become: true
+  become_user: "{{ podman_pod_user }}"
+  notify: Restart pod service
+  environment:
+    XDG_RUNTIME_DIR: "/run/user/{{ podman_user_uid.stdout }}"
+    DBUS_SESSION_BUS_ADDRESS: "unix:path=/run/user/{{ podman_user_uid.stdout }}/bus"

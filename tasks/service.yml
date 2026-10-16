@@ -1,0 +1,22 @@
+---
+- name: Allow unprivileged users to bind to low ports (80+)
+  ansible.posix.sysctl:
+    name: net.ipv4.ip_unprivileged_port_start
+    value: "80"
+    state: present
+    sysctl_set: true
+    reload: true
+  become: true
+  when: podman_pod_allow_unprivileged_ports
+
+- name: Ensure pod service is enabled and running
+  ansible.builtin.systemd_service:
+    name: "{{ podman_pod_name }}-pod.service"
+    state: started
+    enabled: true
+    scope: user
+  become: true
+  become_user: "{{ podman_pod_user }}"
+  environment:
+    XDG_RUNTIME_DIR: "/run/user/{{ podman_user_uid.stdout }}"
+    DBUS_SESSION_BUS_ADDRESS: "unix:path=/run/user/{{ podman_user_uid.stdout }}/bus"

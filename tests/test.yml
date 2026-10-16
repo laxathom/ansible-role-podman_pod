@@ -1,0 +1,6 @@
+---
+- hosts: localhost
+  roles:
+    - role: podman_pod
+      vars:
+        podman_pod_name: foobar_pod

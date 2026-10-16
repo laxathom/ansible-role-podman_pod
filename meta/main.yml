@@ -1,0 +1,29 @@
+---
+galaxy_info:
+  author: lxtnow
+  description: Ansible role to install and manage podman_pod
+  company: lxtnow
+
+  license: MIT
+
+  min_ansible_version: "2.14"
+
+  platforms:
+    - name: EL
+      versions: ["8", "9"]
+
+  galaxy_tags:
+    - podman
+    - container
+    - pod
+    - tool
+    - docker
+    - quadlet
+
+dependencies:
+  - src: git@github.com:laxathom/ansible-role-podman.git
+    scm: git
+    version: main
+    name: lxtnow.podman
+
+collections: []

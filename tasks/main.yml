@@ -1,0 +1,9 @@
+---
+- name: Include System user setup
+  ansible.builtin.include_tasks: setup-user.yml
+
+- name: Include Systemd / container setup
+  ansible.builtin.include_tasks: deploy-quadlet-pod.yml
+
+- name: Include pod service setup
+  ansible.builtin.include_tasks: service.yml

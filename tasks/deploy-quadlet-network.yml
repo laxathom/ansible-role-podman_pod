@@ -1,0 +1,17 @@
+---
+- name: Deploy Quadlet Network unit
+  ansible.builtin.template:
+    src: pod.network.j2
+    dest: "/home/{{ podman_pod_user }}/.config/containers/systemd/{{ podman_pod_network }}.network"
+    owner: "{{ podman_pod_user }}"
+    group: "{{ podman_pod_user }}"
+    mode: '0644'
+
+- name: Force systemd daemon-reload
+  ansible.builtin.command:
+    cmd: "systemctl --user daemon-reload"
+  become: true
+  become_user: "{{ podman_pod_user }}"
+  environment:
+    XDG_RUNTIME_DIR: "/run/user/{{ podman_user_uid.stdout }}"
+    DBUS_SESSION_BUS_ADDRESS: "unix:path=/run/user/{{ podman_user_uid.stdout }}/bus"
